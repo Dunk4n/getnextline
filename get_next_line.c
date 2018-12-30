@@ -23,25 +23,26 @@ int     back_slashn(char *buff, int size)
 
 char    *concat(char *buff, char *line, int size)
 {
-    int     i = 0;
-    int     j = 0;
+    int     cnt[] = {0, 0, 0};
     char    *tmp;
 
-    while (line && line[i++]);
-    size += i;
-    tmp = malloc(size);
-    if (tmp == NULL)
+    while (line && line[cnt[0]++]);
+    size += cnt[0];
+    if ((tmp = malloc(size)) == NULL)
         return (NULL);
-    i = 0;
-    while (line && line[i])
-        tmp[i++] = line[i];
+    while (line && line[cnt[2]]) {
+        tmp[cnt[2]] = line[cnt[2]];
+        cnt[2]++;
+    }
     if (line != NULL)
         free(line);
-    while (buff[j] && buff[j] != '\n')
-        tmp[i + j++] = buff[j];
+    while (buff[cnt[1]] && buff[cnt[1]] != '\n') {
+        tmp[cnt[2] + cnt[1]] = buff[cnt[1]];
+        cnt[1]++;
+    }
     if (buff[0] == '\n' && tmp[0] == '\0')
-        tmp[i + j++] = '\n';
-    tmp[i + j] = '\0';
+        tmp[cnt[2] + cnt[1]++] = '\n';
+    tmp[cnt[2] + cnt[1]] = '\0';
     return (tmp);
 }
 
@@ -67,8 +68,7 @@ char    *to_next_n(char *buff, char *line, int *size)
     while (buff[i] && buff[i++] != '\n');
     if (i - 1 >= 0 && buff[i - 1] == '\n')
         *size = -1;
-    line = malloc(i);
-    if (line == NULL)
+    if ((line = malloc(i)) == NULL)
         return (NULL);
     i = 0;
     while (buff[i] && buff[i] != '\n') {
@@ -88,7 +88,7 @@ char    *get_next_line(int fd)
     int         size = 0;
 
     if (fd == -1)
-        return (0);
+        return (NULL);
     line = to_next_n(buff, line, &size);
     while (size >= 0 && back_slashn(buff, size) == -1) {
         size = read(fd, buff, READ_SIZE);
