@@ -6,7 +6,7 @@
 */
 
 #ifndef READ_SIZE
-#define READ_SIZE 10
+#define READ_SIZE 5
 
 char    *get_next_line(int fd);
 
