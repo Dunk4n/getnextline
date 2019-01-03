@@ -20,7 +20,7 @@ int     nb_malloc(int *bsn, char *line, char *buff)
     return (i + size + 1);
 }
 
-char    *next_line(int fd, char *line, char *buff, int *tmp)
+char    *next_line(int fd, char *line, char *buff)
 {
     char        *relloc = NULL;
     int         tab[3] = {0, 0, 0};
@@ -40,8 +40,7 @@ char    *next_line(int fd, char *line, char *buff, int *tmp)
     if (!(tab[2])) {
         tab[0] = read(fd, buff, READ_SIZE);
         buff[tab[0]] = '\0';
-        (tab[0] == 0) ? *tmp = 1 : 0;
-        (tab[0] > 0) ? relloc = next_line(fd, relloc, buff, tmp) : 0;
+        (tab[0] > 0) ? relloc = next_line(fd, relloc, buff) : 0;
     }
     return (relloc);
 }
@@ -52,19 +51,16 @@ char    *get_next_line(int fd)
     char        *line = NULL;
     int         size = 0;
     int         i = -1;
-    static int  tmp = 0;
 
-    if (fd == -1 || tmp == 1)
+    if (fd == -1)
         return (NULL);
-    line = next_line(fd, line, buff, &tmp);
-    if (!buff[0] && tmp == 0)
+    line = next_line(fd, line, buff);
+    if (!buff[0] && !line[0])
         line = NULL;
-    if (buff[0]) {
-        while (buff[size] && buff[size++] != '\n');
-        while (buff[++i]) {
-            buff[i] = buff[i + size];
-            size = ((buff[i + size]) ? size : size - 1);
-        }
+    while (buff[size] && buff[size++] != '\n');
+    while (buff[++i]) {
+        buff[i] = buff[i + size];
+        size = ((buff[i + size]) ? size : size - 1);
     }
     return (line);
 }
