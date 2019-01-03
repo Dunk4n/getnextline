@@ -55,7 +55,7 @@ char    *get_next_line(int fd)
     if (fd == -1)
         return (NULL);
     line = next_line(fd, line, buff);
-    if (!buff[0] && !line[0])
+    if (!buff[0] && (!line || !line[0]))
         line = NULL;
     while (buff[size] && buff[size++] != '\n');
     while (buff[++i]) {
