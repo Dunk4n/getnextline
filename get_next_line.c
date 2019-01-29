@@ -2,65 +2,72 @@
 ** EPITECH PROJECT, 2018
 ** get_next_line
 ** File description:
-** try not to segfault, good luck :)
+** if you code on paper, you're not a real programmer
 */
 
 #include <stdlib.h>
 #include <unistd.h>
 #include "get_next_line.h"
 
-int     nb_malloc(int *bsn, char *line, char *buff)
+char    *next_line(int fd, char *buff, int nb)
 {
-    int         size = -1;
-    int         i = 0;
+    char tmp[READ_SIZE + 1];
+    char *line = NULL;
+    int  nb_tmp = 0;
+    int  size = 0;
 
-    while (line && line[i++]);
-    while (buff && buff[++size] && buff[size] != '\n');
-    *bsn = (buff && buff[size] == '\n') ? 1 : 0;
-    return (i + size + 1);
+    if ((size = read(fd, tmp, READ_SIZE)) == -1)
+        return (NULL);
+    tmp[size] = '\0';
+    while (tmp[nb_tmp] && tmp[nb_tmp] != '\n' && tmp[nb_tmp++]);
+    if (size != 0 && tmp[nb_tmp] != '\n')
+        line = next_line(fd, buff, nb + nb_tmp);
+    if (tmp[nb_tmp] == '\n' || size == 0) {
+        if ((line = malloc(nb + nb_tmp + 1)) == NULL)
+            return (NULL);
+        line[nb + nb_tmp] = '\0';
+        while (size-- >= 0)
+            buff[size + 1] = tmp[size + 1];
+    }
+    while (line && --nb_tmp >= 0)
+        line[nb + nb_tmp] = tmp[nb_tmp];
+    return (line);
 }
 
-char    *next_line(int fd, char *line, char *buff)
+void    to_n(char *buff, char *tmp, int nb)
 {
-    char        *relloc = NULL;
-    int         tab[3] = {0, 0, 0};
+    int size = 0;
+    int i = -1;
 
-    if ((relloc = malloc(nb_malloc(&(tab[2]), line, buff))) == NULL)
-        return (NULL);
-    while (line && line[tab[1]]) {
-        relloc[tab[1]] = line[tab[1]];
-        tab[1]++;
-    }
-    while (buff && buff[tab[0]] && buff[tab[0]] != '\n') {
-        relloc[tab[1] + tab[0]] = buff[tab[0]];
-        tab[0]++;
-    }
-    relloc[tab[1] + tab[0]] = '\0';
-    (line) ? free(line) : 0;
-    if (!(tab[2])) {
-        tab[0] = read(fd, buff, READ_SIZE);
-        buff[tab[0]] = '\0';
-        (tab[0] > 0) ? relloc = next_line(fd, relloc, buff) : 0;
-    }
-    return (relloc);
-}
-
-char    *get_next_line(int fd)
-{
-    static char buff[READ_SIZE];
-    char        *line = NULL;
-    int         size = 0;
-    int         i = -1;
-
-    if (fd == -1)
-        return (NULL);
-    line = next_line(fd, line, buff);
-    if (!buff[0] && (!line || !line[0]))
-        line = NULL;
+    while (tmp[++nb])
+        buff[nb] = tmp[nb];
     while (buff[size] && buff[size++] != '\n');
     while (buff[++i]) {
         buff[i] = buff[i + size];
         size = ((buff[i + size]) ? size : size - 1);
     }
+}
+
+char    *get_next_line(int fd)
+{
+    static char buff[READ_SIZE + 1];
+    char        tmp[READ_SIZE + 1];
+    char        *line = NULL;
+    int         nb = 0;
+
+    if (fd == -1)
+        return (NULL);
+    tmp[0] = '\0';
+    while (buff[nb] && buff[nb] != '\n' && buff[nb++]);
+    (buff[nb] != '\n') ? line = next_line(fd, tmp, nb) : 0;
+    if (buff[nb] == '\n' && (line = malloc(nb + 1)) == NULL)
+            return (NULL);
+    if (line && !line[0] && !buff[0] && !tmp[0]) {
+        free(line);
+        return (NULL);
+    }
+    while (line && nb-- > 0)
+        line[nb] = buff[nb];
+    to_n(buff, tmp, nb);
     return (line);
 }
