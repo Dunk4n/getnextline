@@ -66,6 +66,7 @@ char    *get_next_line(int fd)
         free(line);
         return (NULL);
     }
+    (buff[nb] == '\n') ? line[nb] = '\0' : 0;
     while (line && nb-- > 0)
         line[nb] = buff[nb];
     to_n(buff, tmp, nb);
