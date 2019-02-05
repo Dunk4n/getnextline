@@ -34,11 +34,14 @@ char    *next_line(int fd, char *buff, int nb)
     return (line);
 }
 
-void    to_n(char *buff, char *tmp, int nb)
+void    to_n(char *buff, char *line, char *tmp, int nb)
 {
     int size = 0;
     int i = -1;
 
+    (buff[nb] == '\n') ? line[nb] = '\0' : 0;
+    while (line && nb-- > 0)
+        line[nb] = buff[nb];
     while (tmp[++nb])
         buff[nb] = tmp[nb];
     while (buff[size] && buff[size++] != '\n');
@@ -60,15 +63,14 @@ char    *get_next_line(int fd)
     tmp[0] = '\0';
     while (buff[nb] && buff[nb] != '\n' && buff[nb++]);
     (buff[nb] != '\n') ? line = next_line(fd, tmp, nb) : 0;
-    if (buff[nb] == '\n' && (line = malloc(nb + 1)) == NULL)
+    if ((buff[nb] == '\n') && !(line = malloc(nb + 1)))
             return (NULL);
-    if (line && !line[0] && !buff[0] && !tmp[0]) {
-        free(line);
-        return (NULL);
+    if (line && !buff[0] && !tmp[0]) {
+        if (!line[0]) {
+            free(line);
+            return (NULL);
+        }
     }
-    (buff[nb] == '\n') ? line[nb] = '\0' : 0;
-    while (line && nb-- > 0)
-        line[nb] = buff[nb];
-    to_n(buff, tmp, nb);
+    to_n(buff, line, tmp, nb);
     return (line);
 }
