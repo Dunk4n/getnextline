@@ -51,11 +51,6 @@ void    to_n(char *buff, char *line, char *tmp, int nb)
     }
 }
 
-char    *cut_buff()
-{
-
-}
-
 char    *get_next_line(int fd)
 {
     static char buff[READ_SIZE + 1];
